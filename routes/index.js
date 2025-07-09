@@ -12,5 +12,5 @@ router.post('/add-user',admine.Imageupload,Allcontoller.AddedData)
 router.get ('/view-user',Allcontoller.ViewUser)
 router.get ('/editdata/:id',Allcontoller.editdata)
 router.post('/edit-user/:id',admine.Imageupload,Allcontoller.editUser)
-
+router.get('/delete-user/:id',Allcontoller.deleteUser)
 module.exports=router

@@ -1,4 +1,7 @@
 const Admin = require('../model/AllAdmineTbl')
+const path=require('path');
+const fs=require('fs');
+const { log } = require('console');
 module.exports.Dashbord = (req, res) => {
     return res.render('dashboard')
 }
@@ -67,7 +70,7 @@ module.exports.ViewUser = async (req, res) => {
         console.log(error);
         res.status(500).send('Error fetching users');
     }
-}
+} 
 
 module.exports.editdata = async (req, res) => {
 
@@ -84,9 +87,9 @@ module.exports.editUser = async (req, res) => {
 
 
 
-    if (password !== confirmPassword) {
-        return res.status(400).send('Passwords do not match');
-    }
+    // if (password !== confirmPassword) {
+    //     return res.status(400).send('Passwords do not match');
+    // }
 
     const user = await Admin.findById(userId);
     if (!user) {
@@ -95,22 +98,42 @@ module.exports.editUser = async (req, res) => {
 
 
     if (req.file) {
-        let oldimage = Path.join(__dirname, '..', user.profilePicture);
+        let oldimage = path.join(__dirname, '..', user.profilePicture);
 
         try {
             fs.unlinkSync(oldimage);
         } catch (error) {
             console.log(error);
 
-
+ 
         }
         req.body.profilePicture = Admin.adpath + "/" + req.file.filename
     } else {
         req.body.profilePicture = user.profilePicture;
     }
 
+    req.body.isActive = req.body.isActive === 'on';
     await Admin.findByIdAndUpdate(userId, req.body)
 
 
     res.redirect('/view-user');
+}
+module.exports.deleteUser=async(req,res)=>{
+    const userId=req.params.id;
+
+    const user =await Admin.findById(userId);
+  
+
+    if(user){
+        let deletImage=path.join(__dirname,"..",user.profilePicture)
+console.log("Image path to delete:", deletImage);
+        try {
+            fs.unlinkSync(deletImage)
+        } catch (error) {
+            console.log("Image delete failed or already removed:", error.message);
+        }
+    }
+
+await Admin.findByIdAndDelete(userId);
+res.redirect('/view-user');
 }
