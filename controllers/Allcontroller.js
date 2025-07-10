@@ -1,7 +1,30 @@
 const Admin = require('../model/AllAdmineTbl')
 const path=require('path');
 const fs=require('fs');
-const { log } = require('console');
+
+module.exports.singin=(req,res)=>{
+    return res.render('SignIn')
+}
+module.exports.login = async (req, res) => {
+    try {
+        let cheakeemail=await Admin.findOne({email:req.body.email})
+
+        if(!cheakeemail){
+             console.log("Email not found");
+        return res.redirect("back");
+        }
+        else{
+            if(cheakeemail.password===req.body.password){
+                res.cookie("AdmineID",cheakeemail,{maxAge: 24 * 60 * 60 * 1000});
+                return res.redirect('/dashbord');
+            }
+        }
+    } catch (error) {
+       console.log(error);
+        
+    }
+}
+
 module.exports.Dashbord = (req, res) => {
     return res.render('dashboard')
 }
