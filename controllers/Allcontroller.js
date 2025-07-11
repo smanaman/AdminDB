@@ -2,12 +2,18 @@ const Admin = require('../model/AllAdmineTbl')
 const path=require('path');
 const fs=require('fs');
 
+
+module.exports.logout=(req,res)=>{
+    res.clearCookie("AdmineID");
+    return res.redirect('/')
+}
 module.exports.singin=(req,res)=>{
     return res.render('SignIn')
 }
 module.exports.login = async (req, res) => {
     try {
         let cheakeemail=await Admin.findOne({email:req.body.email})
+console.log(cheakeemail);
 
         if(!cheakeemail){
              console.log("Email not found");
@@ -16,7 +22,11 @@ module.exports.login = async (req, res) => {
         else{
             if(cheakeemail.password===req.body.password){
                 res.cookie("AdmineID",cheakeemail,{maxAge: 24 * 60 * 60 * 1000});
-                return res.redirect('/dashbord');
+                return res.render('dashboard');
+            }else{
+                console.log("Password is incorrect");
+                return res.redirect("back");
+                 
             }
         }
     } catch (error) {
@@ -26,10 +36,12 @@ module.exports.login = async (req, res) => {
 }
 
 module.exports.Dashbord = (req, res) => {
-    return res.render('dashboard')
+    let singleID=req.cookies.AdmineID
+    return res.render('dashboard', { singleID });
 }
 module.exports.AddData = (req, res) => {
-    return res.render('AddData')
+    let singleID=req.cookies.AdmineID
+    return res.render('AddData', { singleID });
 }
 
 module.exports.AddedData = async (req, res) => {
@@ -79,7 +91,7 @@ module.exports.AddedData = async (req, res) => {
             profilePicture: image
         });
 
-        res.redirect('/');
+        res.redirect('/dashbord');
     } catch (error) {
         console.log(error);
         res.status(500).send('Error creating user');
@@ -88,7 +100,8 @@ module.exports.AddedData = async (req, res) => {
 module.exports.ViewUser = async (req, res) => {
     try {
         const users = await Admin.find();
-        res.render('Showdata', { users });
+        let singleID = req.cookies.AdmineID;
+        res.render('Showdata', { users, singleID });
     } catch (error) {
         console.log(error);
         res.status(500).send('Error fetching users');
